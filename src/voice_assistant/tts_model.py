@@ -6,8 +6,21 @@ import time
 
 
 class TTSModel:
+    """ 
+    Модель перевода текст в речь
+    
+    Parameters
+    ----------
+    model_path: Path - путь до модели
+    sample_rate: int - Частота дискретизации
+    speaker: str  - Говорящий (доступные варианты: aidar, baya, kseniya, xenia, eugene)
+    put_accent: bool
+    put_yo: bool
+    device: str - Устройство работы сети (cpu, cuda и тд.) 
+    num_threads: int - Количество потоков для рассчета
+    """
     def __init__(self, 
-                 model_path: Path, 
+                 model_path: Path = Path("data/models/model.pt"), 
                  sample_rate: int = 48000, 
                  speaker: str = 'baya', 
                  put_accent: bool = True, 
@@ -31,7 +44,13 @@ class TTSModel:
         self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
         self.model.to(device)
 
-    def str_to_phrase(self, text: str):
+    def str_to_phrase(self, text: str) -> None:
+        """ Метод перевода текста в речь.
+        
+        Parameters
+        ----------
+        text: str - Текст, который необходимо озвучить
+        """
 
         audio = self.model.apply_tts(text = text,
                                      speaker = self.speaker,

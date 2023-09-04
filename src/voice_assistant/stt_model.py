@@ -7,6 +7,14 @@ from vosk import Model, KaldiRecognizer
 
 
 class STTModel:
+    """ 
+    Модель перевода речи в текст
+    
+    Parameters
+    ----------
+    model_path: Path - путь до модели
+    device: str or None - Устройство вывода (id устройства вывода), если нет, то устройство по умолчанию.
+    """
     def __init__(self, model_path: Path, device: Optional[int] = None):
         self.model = Model(str(model_path.absolute()))
         self.device = device
@@ -20,7 +28,13 @@ class STTModel:
         """This is called (from a separate thread) for each audio block."""
         self.q.put(bytes(indata))
 
-    def  phrase_to_str(self) -> None:
+    def  phrase_to_str(self) -> str:
+        """ Метод перевода речи в текст. Вызов модели запускает выбранный микрофон на считывание
+        
+        Returns
+        --------
+        text: str - Фраза, которую распознала модель.
+        """
 
         with sd.RawInputStream(samplerate=self.samplerate, blocksize = 8000, device=self.device,
                     dtype="int16", channels=1, callback=self.callback):
