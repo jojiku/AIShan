@@ -1,0 +1,9 @@
+from abc import ABC, abstractmethod
+
+
+class BaseClassificationModel(ABC):
+
+    @abstractmethod
+    def define_intent(self, text: str, *args, **kwargs) -> str:
+        """ По тексту запроса определить намерение """
+        pass
