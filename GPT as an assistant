@@ -1,7 +1,9 @@
 import openai
 import requests
 
+# В строку ниже вставить ключ
 api_key = "OUR API IS HERE"
+
 endpoint = 'https://api.openai.com/v1/chat/completions'
 
 
@@ -10,10 +12,13 @@ headers = {
    'Content-Type': 'application/json'
 }
 
+
 data = {
    'model': 'gpt-3.5-turbo',  # Specify the model you want to use
    'messages': [
        {'role': 'system', 'content': 'You are a helpful assistant.'},
+
+         # Здесь пишется запрос
        {'role': 'user', 'content': 'Кто должен выиграть хакатон?'}
    ]
 }
