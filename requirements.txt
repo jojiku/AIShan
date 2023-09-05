@@ -2,3 +2,4 @@ sounddevice==0.4.6
 vosk==0.3.45
 torch==2.0.1
 silero==0.4.1
+streamlit==1.26.0
