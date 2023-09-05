@@ -3,41 +3,41 @@ from bs4 import BeautifulSoup
 import csv
 import os
 
-# Fetch and parse the HTML content
+# ЗДЕСЬ ИЗМЕНИТЬ
 url = 'https://dostavka24.pro/goryachaya-liniya-ashan/'
 response = requests.get(url)
 soup = BeautifulSoup(response.text, 'html.parser')
 
-# Create a list to store the data
+
 data = []
 
-# Extract text from <h2> tags
+    # Extract text from <h2> tags
 h2_tags = soup.find_all('h2')
 for h2_tag in h2_tags:
     h2_text = h2_tag.get_text()
     data.append(['<h2>', h2_text])
 
-# Extract text from <p> tags
+    # Extract text from <p> tags
 p_tags = soup.find_all('p')
 for p_tag in p_tags:
     p_text = p_tag.get_text()
     data.append(['<p>', p_text])
 
-# Define the folder path and CSV file name
-folder_path = 'C:/Users/Tseh/Desktop/Hackaton'  # Replace with your specific folder path
+# ЗДЕСЬ ИЗМЕНИТЬ
+folder_path = 'C:/Users/Tseh/Desktop/Hackaton'  
 csv_file_name = 'parsed_data.csv'
 
-# Create the full file path by joining the folder path and file name
+
 full_file_path = os.path.join(folder_path, csv_file_name)
 
-# Write the data to a CSV file in the specified folder
+
 with open(full_file_path, 'w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     
-    # Write a header row if needed
+
     # csv_writer.writerow(['Tag', 'Text'])
     
-    # Write the data rows
+ 
     csv_writer.writerows(data)
 
 print(f'Data has been written to {full_file_path}')
