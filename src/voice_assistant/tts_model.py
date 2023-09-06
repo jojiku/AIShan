@@ -63,8 +63,29 @@ class TTSModel:
         sd.wait()
         sd.stop()
 
+    def str_to_file(self, text: str, file: Path, speaker: str | None = None) -> None:
+        """ Метод перевода текста в речь.
+        
+        Parameters
+        ----------
+        text: str - Текст, который необходимо озвучить
+
+        file: Path - Имя файла, в который записать голос
+        """
+        speaker = speaker if speaker is not None else self.speaker
+
+        audio = self.model.save_wav(text = text,
+                                    speaker = speaker,
+                                    put_accent = self.put_accent,
+                                    put_yo = self.put_yo,
+                                    audio_path=str(file))
+
+        
+
 if __name__ == "__main__":
     model = TTSModel(Path("data/models/model.pt"))
 
     example_text = 'Привет мир!'
     model.str_to_phrase(example_text)
+
+    model.str_to_file(example_text, Path("data/raw_data/tts_text.wav"))
