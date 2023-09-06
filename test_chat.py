@@ -24,7 +24,7 @@ def get_bot_answer(chat: list) -> str:
     elif callable(response):
         return response()
     elif isinstance(response, ConsultantInterface):
-        consultant = ConsultantInterface
+        consultant = response
 
         return get_bot_answer(chat)
     else:
