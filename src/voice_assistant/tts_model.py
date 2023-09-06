@@ -26,7 +26,7 @@ class TTSModel:
                  speaker: str = 'baya', 
                  put_accent: bool = True, 
                  put_yo: bool = True, 
-                 device: str = "cuda", 
+                 device: str = "cpu", 
                  num_threads: int = 4):
         
         self.sample_rate = sample_rate
