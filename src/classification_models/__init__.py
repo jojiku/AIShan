@@ -1,0 +1,1 @@
+from .gpt_classificator import GPTClassificator

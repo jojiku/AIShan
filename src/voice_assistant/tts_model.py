@@ -2,7 +2,8 @@ import os
 import torch
 from pathlib import Path
 import sounddevice as sd
-import time
+
+torch._C._jit_set_profiling_mode(False)
 
 
 class TTSModel:
@@ -25,7 +26,7 @@ class TTSModel:
                  speaker: str = 'baya', 
                  put_accent: bool = True, 
                  put_yo: bool = True, 
-                 device: str = "cpu", 
+                 device: str = "cuda", 
                  num_threads: int = 4):
         
         self.sample_rate = sample_rate
@@ -44,25 +45,47 @@ class TTSModel:
         self.model = torch.package.PackageImporter(model_path).load_pickle("tts_models", "model")
         self.model.to(device)
 
-    def str_to_phrase(self, text: str) -> None:
+    def str_to_phrase(self, text: str, speaker: str | None = None) -> None:
         """ Метод перевода текста в речь.
         
         Parameters
         ----------
         text: str - Текст, который необходимо озвучить
         """
+        speaker = speaker if speaker is not None else self.speaker
 
         audio = self.model.apply_tts(text = text,
-                                     speaker = self.speaker,
+                                     speaker = speaker,
                                      put_accent = self.put_accent,
                                      put_yo = self.put_yo)
 
-        sd.play(audio)
-        time.sleep(len(audio) / self.sample_rate)
+        sd.play(audio, self.sample_rate)
+        sd.wait()
         sd.stop()
+
+    def str_to_file(self, text: str, file: Path, speaker: str | None = None) -> None:
+        """ Метод перевода текста в речь.
+        
+        Parameters
+        ----------
+        text: str - Текст, который необходимо озвучить
+
+        file: Path - Имя файла, в который записать голос
+        """
+        speaker = speaker if speaker is not None else self.speaker
+
+        audio = self.model.save_wav(text = text,
+                                    speaker = speaker,
+                                    put_accent = self.put_accent,
+                                    put_yo = self.put_yo,
+                                    audio_path=str(file))
+
+        
 
 if __name__ == "__main__":
     model = TTSModel(Path("data/models/model.pt"))
 
     example_text = 'Привет мир!'
     model.str_to_phrase(example_text)
+
+    model.str_to_file(example_text, Path("data/raw_data/tts_text.wav"))

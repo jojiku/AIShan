@@ -9,6 +9,6 @@ class BaseClassificationModel(ABC):
         pass
 
 
-class TestClassificationModel(ABC):
+class TestClassificationModel(BaseClassificationModel):
     def define_intent(self, text: str, *args, **kwargs) -> str:
         return text

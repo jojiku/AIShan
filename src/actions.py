@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from utils import Joker
+from .utils import Joker
 
 joker = Joker(Path("data/raw_data/jokes.txt"))
 
