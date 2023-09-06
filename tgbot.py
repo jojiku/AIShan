@@ -9,14 +9,77 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import filters
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from pathlib import Path
+
+import os
+from langchain.document_loaders import TextLoader
+
+# used to create the retriever
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
+
+# used to create the retriever
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.vectorstores import FAISS
+from langchain.embeddings import OpenAIEmbeddings
+
+# used to create the retrieval tool
+from langchain.agents import tool
+
+# used to create the memory
+from langchain.memory import ConversationBufferMemory
+
+# used to create the agent executor
+from langchain.chat_models import ChatOpenAI
+from langchain.agents import AgentExecutor
+
+# used to create the prompt template
+from langchain.agents.openai_functions_agent.base import OpenAIFunctionsAgent
+from langchain.schema import SystemMessage
+from langchain.prompts import MessagesPlaceholder
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
 )
 
-token = config.token
+# retriever part
+os.environ["OPENAI_API_KEY"] = config.openai_api_key
+# This is needed for both the memory and the prompt
+memory_key = "history"
+loader = TextLoader(Path("data/raw_data/faq.txt"), encoding='utf8')
+data = loader.load()
+text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+texts = text_splitter.split_documents(data)
+embeddings = OpenAIEmbeddings()
+db = FAISS.from_documents(texts, embeddings)
+retriever = db.as_retriever()
+@tool
+def tool(query):
+    "Searches and returns documents regarding the llm powered autonomous agents blog"
+    docs = retriever.get_relevant_documents(query)
+    return docs
 
+tools = [tool]
+memory = ConversationBufferMemory(memory_key=memory_key, return_messages=True)
+system_message = SystemMessage(
+        content=(
+            "Ты помощник Ашана. Старайся отвечать на все поставленные вопросы. "
+            "Для этого в первую очередь используй предоставленные данные Ашана."
+        )
+)
+prompt = OpenAIFunctionsAgent.create_prompt(
+        system_message=system_message,
+        extra_prompt_messages=[MessagesPlaceholder(variable_name=memory_key)]
+    )
+llm = ChatOpenAI(temperature = 0)
+agent = OpenAIFunctionsAgent(llm=llm, tools=tools, prompt=prompt)
+agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True)
+
+
+token = config.token
 bot = Bot(token=token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 TEL_REGEXP = r'^\+79[\d]{9}$'
@@ -271,9 +334,11 @@ async def cmd_check_person(message: types.Message, state: FSMContext):
     await message.answer(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=make_keyboard(menu_list))
 
 @dp.message_handler(content_types=ContentType.ANY, state='*')
-async def unknown_message(msg: types.Message, state: FSMContext):
-    message_text = text('Я не знаю, что с этим делать \n')
-    await msg.reply(message_text, parse_mode=ParseMode.MARKDOWN)
+async def unknown_message(message: types.Message, state: FSMContext):
+    menu_list = ["Главное меню"]
+    result = agent_executor({"input": message.text})
+    msg = text(result["output"])
+    await message.answer(msg, parse_mode=ParseMode.MARKDOWN, reply_markup=make_keyboard(menu_list))
 
 
 async def main():
