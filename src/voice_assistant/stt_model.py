@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from vosk import Model, KaldiRecognizer
+import wave
 
 
 class STTModel:
@@ -46,10 +47,52 @@ class STTModel:
                 if rec.AcceptWaveform(data):
                     break
             
-            return eval(rec.Result())["text"]
+            return eval(rec.FinalResult())["text"]
+        
+    def file_to_str(self, file: Path) -> str:
+        """ Метод перевода речи в текст. Вызов модели запускает выбранный микрофон на считывание
+
+        Parameters
+        ----------
+        file: Path - путь до записи
+
+        
+        Returns
+        --------
+        text: str - Фраза, которую распознала модель. 
+        
+        """
+
+        results = ""
+        
+        with wave.open(str(file), "rb") as wf:
+
+            recognizer = KaldiRecognizer(self.model, wf.getframerate())
+            while True:
+                data = wf.readframes(4000)
+                if len(data) == 0:
+                    break
+                if recognizer.AcceptWaveform(data):
+                    recognizerResult = eval(recognizer.Result())["text"]
+                    results = results + " " + recognizerResult
+
+            recognizerResult = eval(recognizer.FinalResult())["text"]
+            results = results + " " + recognizerResult
+
+
+
+        return results
+
+
             
 if __name__ == "__main__":
     model = STTModel(Path("data/models/vosk-model-small"))
+
+    # test file
+    print(model.file_to_str(Path("data/raw_data/test.wav")))
+
+
+    # test micro
     while True:
         text = model.phrase_to_str()
         print(text)
