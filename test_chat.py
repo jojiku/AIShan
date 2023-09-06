@@ -1,5 +1,5 @@
 import streamlit as st
-from src.consultants.one_shot_consultant import OneShotConsultant
+from src.consultants.one_shot_consultant import OneShotConsultant, ConsultantInterface
 
 consultant = OneShotConsultant()
 
@@ -14,7 +14,21 @@ def display_chat(chat: list):
         st.chat_message(msg["role"]).write(msg["content"])
 
 def get_bot_answer(chat: list) -> str:
-    return consultant.get_answer(chat)
+
+    global consultant
+
+    response = consultant.get_answer(chat)
+
+    if isinstance(response, str):
+        return response
+    elif callable(response):
+        return response()
+    elif isinstance(response, ConsultantInterface):
+        consultant = ConsultantInterface
+
+        return get_bot_answer(chat)
+    else:
+        return "Что-то пошло не так"
 
 
 if __name__ == "__main__":
