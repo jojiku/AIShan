@@ -11,6 +11,15 @@ def get_completion(messages, model="gpt-3.5-turbo"):
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
+        temperature=0.2, # this is the degree of randomness of the model's output
+    )
+    return response.choices[0].message["content"]
+
+def get_simple_completion(prompt, model="gpt-3.5-turbo"):
+    messages = [{"role": "user", "content": prompt}]
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
         temperature=0, # this is the degree of randomness of the model's output
     )
     return response.choices[0].message["content"]
@@ -26,3 +35,16 @@ class RecipeConsultant(ConsultantInterface):
     @property
     def speaker(self):
         return "baya"
+    
+
+    def find_ingridients(self, text: str):
+        prompt = f"""Identify the products for cookings from the text.\
+            The review is delimited with triple backticks.
+
+            Text: ```{text}```
+
+            The answer should be a list of words separated by commas
+            """
+        
+        return get_simple_completion(prompt)
+
