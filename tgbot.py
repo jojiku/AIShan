@@ -10,10 +10,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.filters.state import State, StatesGroup
 from aiogram.filters import Command
 from pathlib import Path
-from src.voice_assistant import STTModel, TTSModel
 from aiogram.types.input_file import FSInputFile
 import soundfile as sf 
 from pydub import AudioSegment
+from src.voice_assistant import STTModel, TTSModel
+import src.actions as acts
 
 import os
 from langchain.document_loaders import TextLoader
@@ -72,6 +73,7 @@ system_message = SystemMessage(
         content=(
             "Ты помощница Ашана. Старайся отвечать на все поставленные вопросы. "
             "Для этого в первую очередь используй предоставленные данные Ашана."
+            "Рассказывай шутки про покупки."
         )
 )
 prompt = OpenAIFunctionsAgent.create_prompt(
@@ -168,10 +170,16 @@ async def cmd_main_menu(message: types.Message, state: FSMContext):
     if await state.get_state() != UserStates.ready.state:
         await state.set_state(UserStates.person.state)
 
-    menu_list = ["Карта АШАН", "Мои покупки", "Акции", "Поиск магазина", "Вызов оператора"]
+    menu_list = ["Карта АШАН", "Мои покупки", "Акции", "Поиск магазина", "Вызов оператора", "Пошути"]
     msg = text("Для продолжения, пожалуйста, выберите категорию запроса, и я с удовольствием вам помогу 🤗")
     await answer(message, msg, make_keyboard(menu_list))
 
+
+@router.message(lambda message: message.text == "Пошути")
+async def cmd_tell_joke(message: types.Message, state: FSMContext):
+    menu_list = ["Главное меню"]
+    msg = text(acts.tell_joke())
+    await answer(message, msg, make_keyboard(menu_list))
 
 @router.message(lambda message: message.text == "Карта АШАН")
 async def cmd_card(message: types.Message, state: FSMContext):

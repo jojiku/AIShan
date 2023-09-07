@@ -4,7 +4,7 @@ from random import sample
 class Joker:
     def __init__(self, jokes_path: Path):
 
-        with open(jokes_path, "r") as f:
+        with open(jokes_path, "r", encoding='utf-8') as f:
             raw_str = f.read()
             self.jokes = raw_str.split(";")
 
