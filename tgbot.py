@@ -70,7 +70,7 @@ tools = [tool]
 memory = ConversationBufferMemory(memory_key=memory_key, return_messages=True)
 system_message = SystemMessage(
         content=(
-            "Ты помощник Ашана. Старайся отвечать на все поставленные вопросы. "
+            "Ты помощница Ашана. Старайся отвечать на все поставленные вопросы. "
             "Для этого в первую очередь используй предоставленные данные Ашана."
         )
 )
