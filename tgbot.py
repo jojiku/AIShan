@@ -12,6 +12,8 @@ from aiogram.filters import Command
 from pathlib import Path
 from src.voice_assistant import STTModel, TTSModel
 from aiogram.types.input_file import FSInputFile
+import soundfile as sf 
+from pydub import AudioSegment
 
 import os
 from langchain.document_loaders import TextLoader
@@ -88,16 +90,23 @@ router = Router()
 dp.include_router(router)
 TEL_REGEXP = r'^\+79[\d]{9}$'
 tts_model = TTSModel(Path("data/models/model.pt"))
-#stt_model = STTModel(Path('data/models/vosk-model-small'))
+stt_model = STTModel(Path('data/models/vosk-model-small'))
 
 
 async def answer(message, msg, reply_markup, parse_mode="MarkdownV2"):
-    #await message.answer(msg, parse_mode=parse_mode, reply_markup=reply_markup)
-    file_on_disk = Path("data/raw_data/tts_text.wav")
-    tts_model.str_to_file(msg, file_on_disk)
-    voice = FSInputFile(file_on_disk)
-    await bot.send_voice(message.from_user.id, voice, caption=msg, reply_markup=reply_markup)
-    os.remove(file_on_disk)  # Удаление временного файла 
+    file_wav = Path("data/raw_data/tts_text.wav")
+    combined_sounds = AudioSegment.empty()
+    for i in range(0, len(msg), 500):
+        infile = f"text_{i}.wav"
+        tts_model.str_to_file(msg[i:i+500], infile)
+        combined_sounds += AudioSegment.from_wav(infile)
+        os.remove(infile)
+    combined_sounds.export(file_wav, format="wav")
+    voice = FSInputFile(file_wav)
+    await bot.send_voice(message.from_user.id, voice, caption=msg[:1000], reply_markup=reply_markup)
+    if len(msg) >= 1000:
+        await message.answer(msg[1000:].replace('.', '\.').replace('-', '\-'), parse_mode=parse_mode, reply_markup=reply_markup)
+    os.remove(file_wav)  # Удаление временного файла 
 
 
 def make_keyboard(menu):
@@ -122,9 +131,9 @@ class UserStates(StatesGroup):
 async def cmd_init(message: types.Message, state: FSMContext):
     await state.set_state(UserStates.ask_tel.state)
     menu_list = ["Главное меню"]
-    msg = text("Укажите, пожалуйста, свой номер телефона  в формате \+79ХХХХХХХХХ\.\n\
-Отправляя номер телефона, вы даете согласие на обработку персональных данных\.\n\
-Подробнее: https://www\.auchan\.ru/privacy\-policy/")
+    msg = text("Укажите, пожалуйста, свой номер телефона  в формате +79ХХХХХХХХХ.\n\
+Отправляя номер телефона, вы даете согласие на обработку персональных данных.\n\
+Подробнее: https://www.auchan.ru/privacy-policy/")
     await answer(message, msg, make_keyboard(menu_list))
 
 
@@ -354,14 +363,17 @@ async def voice_message_handler(message: types.Message, state: FSMContext):
     file_id = message.voice.file_id
     file = await bot.get_file(file_id)
     file_path = file.file_path
-    file_on_disk = Path("data/raw_data/", f"{file_id}.wav")
-    await bot.download_file(file_path, destination=file_on_disk)
-    #str_text = model.file_to_str(file_on_disk)
-    str_text = "Привет"
+    file_ogg = Path("data/raw_data/", f"{file_id}.ogg")
+    file_wav = Path("data/raw_data/", f"{file_id}.wav")
+    await bot.download_file(file_path, destination=file_ogg)
+    data, samplerate = sf.read(file_ogg)
+    sf.write(file_wav, data, samplerate)
+    str_text = stt_model.file_to_str(file_wav)
+    os.remove(file_wav)
+    os.remove(file_ogg)
     menu_list = ["Главное меню"]
     msg = text(await use_chain(str_text))
     await answer(message, msg, make_keyboard(menu_list))
-    os.remove(file_on_disk)  # Удаление временного файла 
 
 @router.message()
 async def unknown_message(message: types.Message, state: FSMContext):
