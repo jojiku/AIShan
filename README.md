@@ -1,6 +1,7 @@
 # A(I)Shan  
 ## Ссылка на демо: https://aishan.streamlit.app/
-<img ![Picture2](https://github.com/TrybinD/AIShan/assets/56271473/63c6a0be-2ed0-4bf9-8b1f-f61c322805d2) width="500">
+
+![Picture2](https://github.com/TrybinD/AIShan/assets/56271473/63c6a0be-2ed0-4bf9-8b1f-f61c322805d2)
 
 ## Репозиторий проекта от команды A(I)Shan для хакатона от AI Talent Hub. 
 ### Изначально в качестве проекта был сделан помощник-консультант, который понимает текст и голос человека и при этом также может отвечать на вопросы клиентов как голосом, так и текстом. 
