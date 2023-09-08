@@ -36,7 +36,7 @@ class Product:
         if add_button == "add":
             st.button("Добавить в корзину", on_click=add_to_backet, args=(self, True), key=self.name+"_add_button")
         if add_button == "delete":
-            st.button("Удалить из карзины", on_click=delete_from_backet, args=(self, True), key=self.name+"_delete_button")
+            st.button("Удалить из корзины", on_click=delete_from_backet, args=(self, True), key=self.name+"_delete_button")
 
 all_products = [Product(name, link) for name, link in products_row]
 
@@ -56,14 +56,14 @@ def update_advice():
 
     ingridients, recipe_name, recipe = find_recipe(st.session_state["basket"])
 
-    message = f"Вы добавили {', '.join([i.name for i in st.session_state['basket']])} в карзину. \n \
+    message = f"Вы добавили {', '.join([i.name for i in st.session_state['basket']])} в корзину. \n \
                 Из этого можно приготовить {recipe_name} \n Показать рецепт?"
 
     st.session_state["advice"] = (message, ingridients, recipe)
 
 def show_recipe(recipe, ingridients):
 
-    st.chat_message("assistant").write(recipe)
+    st.chat_message("assistant").write(re.sub(r"\d[.] ", "\n {}) ", recipe).format(*range(1, 100)))
 
     ask_to_add_to_basket(ingridients, False)
 
@@ -119,8 +119,8 @@ def ask_to_add_to_basket(ingridients: list, is_add_message=True):
             if product.name.lower() == i.lower() and product.name.lower() not in [i.name.lower() for i in st.session_state["basket"]]:
                 ingridients_to_advice.append(product)
 
-    advice = ("Для приготовления вам нужно добавить в карзину: \n" + 
-              "\n".join([f" - {i.name}" for i in ingridients_to_advice]) + " \n\n " + 
+    advice = ("Для приготовления вам нужно добавить в корзину: \n\n" + 
+              "\n\n".join([f" ✅ {i.name}" for i in ingridients_to_advice]) + " \n\n " + 
               "Добавить в корзину?")
     
     st.chat_message("assistant").write(advice)
