@@ -54,12 +54,19 @@ def add_to_backet(product, is_update_advice=False):
 
 def update_advice():
 
-    ingridients, recipe_name, recipe = find_recipe(st.session_state["basket"])
+    try: 
+        ingridients, recipe_name, recipe = find_recipe(st.session_state["basket"])
 
-    message = f"Вы добавили {', '.join([i.name for i in st.session_state['basket']])} в корзину. \n \
-                Приготовь из этого {recipe_name}! \n"
-    
-    link = "https://i.artfile.ru/2880x1800_954014_[www.ArtFile.ru].jpg" # Заглушка
+        message = f"Вы добавили {', '.join([i.name for i in st.session_state['basket']])} в корзину. \n \
+                    Приготовь из этого {recipe_name}! \n"
+        
+        link = "https://i.artfile.ru/2880x1800_954014_[www.ArtFile.ru].jpg" # Заглушка
+    except:
+        message = "У нас не получилось придумать рецепт, простите 😞. \n\n Мы чиним"
+
+        ingridients, recipe = "", ""
+        
+        link = "https://i.yapx.cc/VakAF.gif"
 
     st.session_state["advice"] = (message, ingridients, recipe, link)
 
@@ -187,13 +194,15 @@ def display_advices():
 
             st.image(link)
 
-            st.chat_message("assistant").write("Показать рецепт?")
+            if recipe:
 
-            col1, col2 = st.columns(2)
+                st.chat_message("assistant").write("Показать рецепт?")
 
-            if col1.button("Да", key="67890"):
-                show_recipe(recipe, ingridients)
-            col2.button("Нет", key="7890987")
+                col1, col2 = st.columns(2)
+
+                if col1.button("Да", key="67890"):
+                    show_recipe(recipe, ingridients)
+                col2.button("Нет", key="7890987")
         else:
             st.chat_message("assistant").write("Добавте продукты, чтобы получить советы")
 
