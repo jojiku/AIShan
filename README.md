@@ -1,4 +1,4 @@
-# A(I)Shan
+# A(I)Shan  Ссылка на демо: https://aishan.streamlit.app/
 ![Picture1](https://github.com/TrybinD/AIShan/assets/56271473/43527ef4-6615-4c9f-9404-8277b3d356ab)
 
 ## Репозиторий проекта от команды A(I)Shan для хакатона от AI Talent Hub. 
