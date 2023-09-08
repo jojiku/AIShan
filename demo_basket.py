@@ -57,9 +57,11 @@ def update_advice():
     ingridients, recipe_name, recipe = find_recipe(st.session_state["basket"])
 
     message = f"Вы добавили {', '.join([i.name for i in st.session_state['basket']])} в корзину. \n \
-                Из этого можно приготовить {recipe_name} \n Показать рецепт?"
+                Приготовь из этого {recipe_name}! \n"
+    
+    link = "https://i.artfile.ru/2880x1800_954014_[www.ArtFile.ru].jpg" # Заглушка
 
-    st.session_state["advice"] = (message, ingridients, recipe)
+    st.session_state["advice"] = (message, ingridients, recipe, link)
 
 def show_recipe(recipe, ingridients):
 
@@ -179,9 +181,13 @@ def display_advices():
 
         if "advice" in st.session_state:
 
-            message, ingridients, recipe = st.session_state["advice"]
+            message, ingridients, recipe, link = st.session_state["advice"]
 
             st.chat_message("assistant").write(message)
+
+            st.image(link)
+
+            st.chat_message("assistant").write("Показать рецепт?")
 
             col1, col2 = st.columns(2)
 
