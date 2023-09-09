@@ -170,7 +170,7 @@ def display_sidebar():
 
         st.text_input("Ответ", label_visibility='hidden', placeholder="Посоветуй что-нибудь на ужин", key="chat_input")
 
-        if st.button("Отчистить чат"):
+        if st.button("Очистить чат"):
             st.session_state["messages"] = []
 
         with chat_container:
