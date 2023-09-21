@@ -8,9 +8,9 @@
 ### We present a smart shopping cart that offers customers recipes based on the products in their cart. 
 
 ### Here's what it does:
-Suggests recipes based on the cart contents
-Provides personalized shopping recommendations
-Offers information about each product.
+- Suggests recipes based on the cart contents
+- Provides personalized shopping recommendations
+- Offers information about each product.
 
 
 
